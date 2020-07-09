@@ -33,7 +33,13 @@ fprintf(specA, 'LOG?');
 disp(fscanf(specA));
 
 %% Power obtention
-fprintf(specA, 'PWR 1300.0');
+%% Importante
+%1. write CMD ARG (program)
+%2. write CMD? (query)
+%3. read RSP (response)
+%%
+fprintf(specA, 'PWR 1350.5');
+fprintf(specA, 'PWR?');
 pwr = fscanf(specA);
 disp(pwr);
 fprintf(specA,'PWRR?');
@@ -43,7 +49,7 @@ disp(fscanf(specA));
 %lambda = linspace(lc-BW/2,lc+BW/2,BW);
 %plot(lambda,spect);
 %% Cierre de conexión
-save('specOpt.mat','a','address','ana','b','BW','l','meas','pwr','specA');
+save('specOpt.mat','a','address','b','BW','l','meas','pwr','specA');
 fclose(specA);
 ff=8; %chivato para "garantizar" cierre de conexiónn
 %% cada vez que ejecuto, cerrar conexión en consola para evitar cuelgue!!!!!
