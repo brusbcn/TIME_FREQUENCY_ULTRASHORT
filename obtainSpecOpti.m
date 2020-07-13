@@ -2,8 +2,8 @@ close all;
 clear all;
 %% Parametros
 dbstop if error
-lc = 1580; %frecuencia central -nm
-BW = 200; % ancho de banda -nm
+lc = 1550.0; %frecuencia central -nm
+BW = 200.0; % ancho de banda -nm
 address = '172.26.0.5'; %direccion del conector GPIB
 GPIBaddress = 1234; %dirección GPIB
 timeout = 30;
@@ -13,33 +13,45 @@ specA = tcpip(address, GPIBaddress);%opcional especificar 'NetworkRole', 'server
 specA.Timeout = timeout; %timeout de conexión
 specA.Terminator = 'CR/LF'; %especifica terminador (LF, CR, etc.)
 %Apertura de conexión GPIB-TCP
-b= OpenGPIB(specA,g_ins);
+fopen(specA); %abre la conexión
+fprintf(specA, '++addr 4'); %especifica de dirección GPIB en espectrómetro
+fprintf(specA,'++ver'); %especifica la versión del GPIB
+a=fscanf(specA); %lee el comando guardado en la memoria del espectrómetro
+%printf(specA, '++eos 3'); %evita tener que transmitir bits de control en transmisión/recepción
+for i = 1:length(a)
+    b(i)=char(a(i)); %muestra en pantalla los datos guardados
+end
 disp(b);
 
 %% Medidas
 %% Asignar span + frecuencia central
-fprintf(specA, 'AUT?'); %efectua una medida del espectro "Automeasure"
+fprintf(specA, 'SSI');
+meas = 1;
+if meas == 1
+fprintf(specA, 'AUT'); %efectua una medida del espectro "Automeasure"
+end
+meas = fscanf(specA);
+if meas == 0
+fprintf(specA,'CNT 15 0.0');
 fprintf(specA,'CNT?'); %escribe comando - asignar la frecuencia central
-l = fscanf(specA); 
-disp(l)
-fprintf(specA, 'LOG?');
-disp(fscanf(specA));
-
+disp(fscanf(specA)); 
+%fprintf(specA, 'LOG?');
+%disp(fscanf(specA))
 %% Spectrum obtention
-%for i = 0:BW-1
-% spectrum(i+1) = ObtainPower(specA,i+(lc-BW/2));
-%end
-lambda = 1480;
-fprintf(specA, 'PWR lambda');
-fprintf(specA, 'PWR?');
+fprintf(specA,'WSS 1450.0,1650.0');
+fprintf(specA,'WSS?');
+disp(fscanf(specA));
+fprintf(specA,'MKA 1500.0');
+fprintf(specA,'MKA?');
 fprintf(specA,'PWRR?');
-power = fscanf(specA);
+disp(fscanf(specA));
+end
 %guardar en un .mat los datos
 %% Graphic Display
-plot(lambda,spect);
+%plot(lambda,spect);
 
 %% Cierre de conexión
-save('specOpt.mat','a','address','b','BW','l','meas','pwr','specA');
+save('specOpt.mat','address','b','BW','specA');
 fclose(specA);
 ff=8; %chivato para "garantizar" cierre de conexión
 
@@ -50,20 +62,4 @@ ff=8; %chivato para "garantizar" cierre de conexión
 %3. read RSP (response)
 %% Funciones
 
-function b = OpenGPIB(specA,gpibad)
-fopen(specA); %abre la conexión
-ad = gpibad;
-fprintf(specA, '++addr ad'); %especifica de dirección GPIB en espectrómetro
-fprintf(specA,'++ver'); %especifica la versión del GPIB
-a=fscanf(specA); %lee el comando guardado en la memoria del espectrómetro
-%printf(specA, '++eos 3'); %evita tener que transmitir bits de control en transmisión/recepción
-for i = 1:length(a)
-    b(i)=char(a(i)); %muestra en pantalla los datos guardados
-end
-end
-function power = ObtainPower(specA,lambda)
-fprintf(specA, 'PWR lambda');
-fprintf(specA, 'PWR?');
-fprintf(specA,'PWRR?');
-power = fscanf(specA);
-end
+
