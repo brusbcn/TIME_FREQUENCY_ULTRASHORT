@@ -1,0 +1,6 @@
+clc;
+clear all;
+
+%% Leer archivo de texto
+%% import data para coger los datos
+Measure = table2array('Measure1.mat');

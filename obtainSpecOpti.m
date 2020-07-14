@@ -26,13 +26,10 @@ disp(b);
 %% Medidas
 %% Asignar span + frecuencia central
 fprintf(specA, 'SSI');
-meas = 1;
-if meas == 1
 fprintf(specA, 'AUT'); %efectua una medida del espectro "Automeasure"
-end
 meas = fscanf(specA);
-if meas == 0
-fprintf(specA,'CNT 15 0.0');
+disp(meas);
+fprintf(specA,'CNT 1550.0');
 fprintf(specA,'CNT?'); %escribe comando - asignar la frecuencia central
 disp(fscanf(specA)); 
 %fprintf(specA, 'LOG?');
@@ -42,10 +39,10 @@ fprintf(specA,'WSS 1450.0,1650.0');
 fprintf(specA,'WSS?');
 disp(fscanf(specA));
 fprintf(specA,'MKA 1500.0');
-fprintf(specA,'MKA?');
+%fprintf(specA,'MKA?');
 fprintf(specA,'PWRR?');
-disp(fscanf(specA));
-end
+pow=fscanf(specA);
+disp(pow);
 %guardar en un .mat los datos
 %% Graphic Display
 %plot(lambda,spect);
