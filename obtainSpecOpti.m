@@ -8,12 +8,16 @@ address = '172.26.0.5'; %direccion del conector GPIB
 GPIBaddress = 1234; %dirección GPIB
 timeout = 30;
 g_ins = 4;
+c_lbd = 1550.0;
+lbd_start = 1300.0;
+lbd_stop = 1800.0;
 %% Creacion y apertura de conexión
 specA = tcpip(address, GPIBaddress);%opcional especificar 'NetworkRole', 'server, crea TCP/IP
 specA.Timeout = timeout; %timeout de conexión
 specA.Terminator = 'CR/LF'; %especifica terminador (LF, CR, etc.)
 %Apertura de conexión GPIB-TCP
 fopen(specA); %abre la conexión
+g = num2str(g_ins);
 fprintf(specA, '++addr 4'); %especifica de dirección GPIB en espectrómetro
 fprintf(specA,'++ver'); %especifica la versión del GPIB
 a=fscanf(specA); %lee el comando guardado en la memoria del espectrómetro
@@ -32,21 +36,23 @@ disp(meas);
 fprintf(specA,'CNT 1550.0');
 fprintf(specA,'CNT?'); %escribe comando - asignar la frecuencia central
 disp(fscanf(specA)); 
-%fprintf(specA, 'LOG?');
-%disp(fscanf(specA))
+fprintf(specA, 'LOG?');
+disp(fscanf(specA))
 %% Spectrum obtention
-fprintf(specA,'WSS 1450.0,1650.0');
+fprintf(specA,'WSS 1300.0,1800.0');
 fprintf(specA,'WSS?');
 disp(fscanf(specA));
-fprintf(specA,'MKA 1500.0');
-%fprintf(specA,'MKA?');
-fprintf(specA,'PWRR?');
-pow=fscanf(specA);
-disp(pow);
+%Controlar la resolución para obtener nº de puntos
+fprintf(specA, 'RES 1');
+fprintf(specA, 'RES 1');
+fprintf(specA, 'RES?');
+disp(fscanf(specA));
+% Obtener datos de la memoria
+fprintf(specA, 'DQA?');
+data = fscanf(specA);
 %guardar en un .mat los datos
 %% Graphic Display
 %plot(lambda,spect);
-
 %% Cierre de conexión
 save('specOpt.mat','address','b','BW','specA');
 fclose(specA);
